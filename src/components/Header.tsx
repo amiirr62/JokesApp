@@ -1,7 +1,9 @@
 import { Link } from '@tanstack/react-router'
 import ThemeToggle from './ThemeToggle'
+import { authClient } from '#/lib/auth-client'
 
 export default function Header() {
+  const { data: session  } = authClient.useSession()
   return (
     <header className="sticky top-0 z-50 border-b border-[var(--line)] bg-[var(--header-bg)] px-4 backdrop-blur-lg">
       <nav className="page-wrap flex flex-wrap items-center gap-x-3 gap-y-2 py-3 sm:py-4">
@@ -60,8 +62,17 @@ export default function Header() {
             to="/login"
             className="nav-link"
             activeProps={{ className: 'nav-link is-active' }}
+            onClick={async (e) => {
+    if (session) {
+      e.preventDefault(); // stop navigation
+
+      await authClient.signOut(); // or logout()
+
+      window.location.href = "/login"; // redirect after logout
+    }
+  }}
           >
-            Login
+            {!session ? "Login" : "Logout"  }
           </Link>
           <Link
             to="/register"
