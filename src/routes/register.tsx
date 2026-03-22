@@ -22,7 +22,7 @@ function RouteComponent() {
   return (
   <div><form onSubmit={handleSubmit}>
       <input onChange={(e) => setName(e.target.value)} type="text" name='name' placeholder='name' />
-      <input onChange={(e) => setEmail(e.target.value)} type="text" name='email' placeholder='email' />
+      <input onChange={(e) => setEmail(e.target.value)} type="email" name='email' placeholder='email' />
       <input onChange={(e) => setPassword(e.target.value)} type="password" name='password' placeholder='password' />
       <button>Register</button>
     </form></div>
