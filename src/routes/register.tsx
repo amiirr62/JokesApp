@@ -11,12 +11,13 @@ function RouteComponent() {
   const [name,setName] = useState("")
   const [email,setEmail] = useState("")
   const [password,setPassword] = useState("")
+
   const handleSubmit: React.SubmitEventHandler<HTMLFormElement> = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // we prevent the page from reloading when submit the form.
    const result = await authClient.signUp.email({email,name,password});
    if (result.error) return;
    
-   navigate({to:"/"});
+   navigate({to:"/"});  
 
   }
   return (

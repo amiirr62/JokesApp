@@ -3,7 +3,8 @@ import ThemeToggle from './ThemeToggle'
 import { authClient } from '#/lib/auth-client'
 
 export default function Header() {
-  const { data: session  } = authClient.useSession()
+  const { data: session } = authClient.useSession()
+
   return (
     <header className="sticky top-0 z-50 border-b border-[var(--line)] bg-[var(--header-bg)] px-4 backdrop-blur-lg">
       <nav className="page-wrap flex flex-wrap items-center gap-x-3 gap-y-2 py-3 sm:py-4">
@@ -32,6 +33,7 @@ export default function Header() {
               />
             </svg>
           </a>
+
           <a
             href="https://github.com/TanStack"
             target="_blank"
@@ -58,22 +60,36 @@ export default function Header() {
           >
             Home
           </Link>
+
+          {session ? (
+            <Link
+              to="/add-joke"
+              className="nav-link"
+              activeProps={{ className: 'nav-link is-active' }}
+            >
+              Add Joke
+            </Link>
+          ) : (
+            <span className="nav-link opacity-50 cursor-not-allowed">
+              Add Joke
+            </span>
+          )}
+
           <Link
             to="/login"
             className="nav-link"
             activeProps={{ className: 'nav-link is-active' }}
             onClick={async (e) => {
-    if (session) {
-      e.preventDefault(); // stop navigation
-
-      await authClient.signOut(); // or logout()
-
-      window.location.href = "/login"; // redirect after logout
-    }
-  }}
+              if (session) {
+                e.preventDefault()
+                await authClient.signOut()
+                window.location.href = '/login'
+              }
+            }}
           >
-            {!session ? "Login" : "Logout"  }
+            {!session ? 'Login' : 'Logout'}
           </Link>
+
           <Link
             to="/register"
             className="nav-link"
@@ -81,7 +97,6 @@ export default function Header() {
           >
             Register
           </Link>
-          
         </div>
       </nav>
     </header>

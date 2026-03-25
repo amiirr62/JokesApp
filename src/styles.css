@@ -257,3 +257,9 @@ a {
     transform: translateY(0);
   }
 }
+
+
+.nav-link-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
