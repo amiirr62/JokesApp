@@ -9,7 +9,7 @@ const getJokes = createServerFn({ method: 'GET' }).handler(async () => {
   const jokes = await db
     .select()
     .from(joke)
-    .orderBy(desc(joke.createdAt))
+    .orderBy(desc(joke.score), desc(joke.createdAt))
 
   return jokes
 })
