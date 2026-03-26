@@ -18,6 +18,7 @@ export const joke = pgTable(
   "joke",
   {
     id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+    title: text("title").notNull(),
     content: text("content").notNull(),
     score: integer("score").notNull().default(0),
     userId: text("user_id")

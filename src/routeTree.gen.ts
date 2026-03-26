@@ -14,6 +14,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AddJokeRouteImport } from './routes/add-joke'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiJokesRouteImport } from './routes/api/jokes'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const RegisterRoute = RegisterRouteImport.update({
@@ -41,6 +42,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiJokesRoute = ApiJokesRouteImport.update({
+  id: '/api/jokes',
+  path: '/api/jokes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -53,6 +59,7 @@ export interface FileRoutesByFullPath {
   '/add-joke': typeof AddJokeRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/api/jokes': typeof ApiJokesRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
@@ -61,6 +68,7 @@ export interface FileRoutesByTo {
   '/add-joke': typeof AddJokeRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/api/jokes': typeof ApiJokesRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
@@ -70,6 +78,7 @@ export interface FileRoutesById {
   '/add-joke': typeof AddJokeRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/api/jokes': typeof ApiJokesRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
@@ -80,9 +89,17 @@ export interface FileRouteTypes {
     | '/add-joke'
     | '/login'
     | '/register'
+    | '/api/jokes'
     | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/add-joke' | '/login' | '/register' | '/api/auth/$'
+  to:
+    | '/'
+    | '/about'
+    | '/add-joke'
+    | '/login'
+    | '/register'
+    | '/api/jokes'
+    | '/api/auth/$'
   id:
     | '__root__'
     | '/'
@@ -90,6 +107,7 @@ export interface FileRouteTypes {
     | '/add-joke'
     | '/login'
     | '/register'
+    | '/api/jokes'
     | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
@@ -99,6 +117,7 @@ export interface RootRouteChildren {
   AddJokeRoute: typeof AddJokeRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
+  ApiJokesRoute: typeof ApiJokesRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -139,6 +158,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/jokes': {
+      id: '/api/jokes'
+      path: '/api/jokes'
+      fullPath: '/api/jokes'
+      preLoaderRoute: typeof ApiJokesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -155,6 +181,7 @@ const rootRouteChildren: RootRouteChildren = {
   AddJokeRoute: AddJokeRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
+  ApiJokesRoute: ApiJokesRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport

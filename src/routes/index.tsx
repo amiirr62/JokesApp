@@ -2,9 +2,15 @@ import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { db } from '#/db'
 import { joke } from '#/db/schema'
+import { desc } from 'drizzle-orm'
+import { authClient } from '#/lib/auth-client'
 
 const getJokes = createServerFn({ method: 'GET' }).handler(async () => {
-  const jokes = await db.select().from(joke)
+  const jokes = await db
+    .select()
+    .from(joke)
+    .orderBy(desc(joke.createdAt))
+
   return jokes
 })
 
@@ -18,6 +24,10 @@ export const Route = createFileRoute('/')({
 
 function App() {
   const jokes = Route.useLoaderData()
+  const { data: session, isPending } = authClient.useSession()
+
+  const topJokes = jokes.slice(0, 3)
+  const moreJokes = jokes.slice(3)
 
   return (
     <main className="min-h-screen px-6 py-10">
@@ -68,14 +78,14 @@ function App() {
                   </p>
                 </div>
 
-                <div className="rounded-[1.6rem] border border-white/70 bg-[#eb3e94] px-5 py-6 ">
+                <div className="rounded-[1.6rem] border border-white/70 bg-[#eb3e94] px-5 py-6">
                   <div className="mb-3 text-4xl">😆</div>
                   <p className="text-2xl font-extrabold tracking-wide text-[#6f5b20] uppercase">
                     Loop Laughter
                   </p>
                 </div>
 
-                <div className="rounded-[1.6rem] border border-white/70 bg-[#ecde11] px-5 py-6 ">
+                <div className="rounded-[1.6rem] border border-white/70 bg-[#ecde11] px-5 py-6">
                   <div className="mb-3 text-4xl">😹</div>
                   <p className="text-2xl font-extrabold tracking-wide text-[#6f5b20] uppercase">
                     Merge Meower
@@ -83,7 +93,7 @@ function App() {
                 </div>
               </div>
 
-              <div className="mt-4 rounded-[1.2rem] border border-[#e8d9c7]  px-5 py-4">
+              <div className="mt-4 rounded-[1.2rem] border border-[#e8d9c7] px-5 py-4">
                 <p className="m-0 text-2xl font-semibold text-[#8a6540]">
                   Drop a joke and join the chaos.
                 </p>
@@ -91,24 +101,93 @@ function App() {
             </div>
           </div>
         </section>
-        
-        {/* Display Jokes Here */} 
-        <section className="mt-6 rounded-[1.8rem] border border-[#161616] bg-white/70 p-7 ">
-          {jokes.length === 0 ? (
-            <p className="m-0 text-2xl italic text-[#76829a]">No jokes found!😥</p>
+
+        <section className="mt-6 rounded-[1.8rem] border border-[#eadfd1] bg-white/70 p-7">
+          <div className="mb-6">
+            <h2 className="m-0 text-4xl font-bold text-[#2f241b]">📫 Joke Bin</h2>
+            <p className="mt-3 text-lg font-bold uppercase tracking-[0.12em] text-[#8a6a45]">
+              ⭐ Top 3 Jokes
+            </p>
+          </div>
+
+          {isPending ? (
+            <p className="m-0 text-2xl italic text-[#76829a]">Loading session...</p>
+          ) : !session ? (
+            <p className="m-0 text-2xl italic text-[#76829a]">
+              Please log in to view jokes.
+            </p>
+          ) : jokes.length === 0 ? (
+            <p className="m-0 text-2xl italic text-[#76829a]">No jokes found! 😥</p>
           ) : (
-            <div className="space-y-4">
-              {jokes.map((oneJoke) => (
-                <article
-                  key={oneJoke.id}
-                  className="rounded-[1.3rem] border border-[#eadfd1] bg-[#fffaf3] p-5"
-                >
-                  <p className="m-0 text-xl leading-8 text-[#2f241b]">
-                    {oneJoke.content}
+            <>
+              <div className="space-y-4">
+                {topJokes.map((oneJoke) => (
+                  <article
+                    key={oneJoke.id}
+                    className="rounded-[1.6rem] border border-[#ead39f] bg-[#fffaf3] p-5 shadow-[0_8px_18px_rgba(80,60,30,0.04)]"
+                  >
+                    <div className="flex gap-4">
+                      <div className="flex min-w-[54px] flex-col items-center justify-center rounded-[1rem] border border-[#eadfd1] bg-white px-2 py-3 text-lg font-bold text-[#6d5d4d]">
+                        <span>↑</span>
+                        <span>{oneJoke.score}</span>
+                        <span>↓</span>
+                      </div>
+
+                      <div className="flex-1">
+                        <h3 className="m-0 text-3xl font-bold text-[#2f241b]">
+                          {oneJoke.title}
+                        </h3>
+
+                        <p className="mt-3 text-2xl leading-9 text-[#6d5d4d]">
+                          {oneJoke.content}
+                        </p>
+
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          <span className="rounded-full border border-[#f0d58a] bg-[#fff1bf] px-3 py-1 text-sm font-bold uppercase tracking-wide text-[#9f6820]">
+                            ⭐ Top Joke
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+
+              {moreJokes.length > 0 && (
+                <div className="mt-8">
+                  <p className="mb-4 text-lg font-bold uppercase tracking-[0.12em] text-[#8a6a45]">
+                    More Jokes
                   </p>
-                </article>
-              ))}
-            </div>
+
+                  <div className="space-y-4">
+                    {moreJokes.map((oneJoke) => (
+                      <article
+                        key={oneJoke.id}
+                        className="rounded-[1.6rem] border border-[#eadfd1] bg-white p-5 shadow-[0_8px_18px_rgba(80,60,30,0.04)]"
+                      >
+                        <div className="flex gap-4">
+                          <div className="flex min-w-[54px] flex-col items-center justify-center rounded-[1rem] border border-[#eadfd1] bg-white px-2 py-3 text-lg font-bold text-[#6d5d4d]">
+                            <span>↑</span>
+                            <span>{oneJoke.score}</span>
+                            <span>↓</span>
+                          </div>
+
+                          <div className="flex-1">
+                            <h3 className="m-0 text-3xl font-bold text-[#2f241b]">
+                              {oneJoke.title}
+                            </h3>
+
+                            <p className="mt-3 text-2xl leading-9 text-[#6d5d4d]">
+                              {oneJoke.content}
+                            </p>
+                          </div>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </section>
       </div>
