@@ -1,8 +1,8 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { db } from '#/db'
 import { joke } from '#/db/schema'
-import { desc } from 'drizzle-orm'
+import { desc, eq } from 'drizzle-orm'
 import { authClient } from '#/lib/auth-client'
 
 const getJokes = createServerFn({ method: 'GET' }).handler(async () => {
@@ -13,6 +13,31 @@ const getJokes = createServerFn({ method: 'GET' }).handler(async () => {
 
   return jokes
 })
+
+const voteJoke = createServerFn({ method: 'POST' }).handler(
+  async ({ data }: { data: { jokeId: string; change: number } }) => {
+    const foundJokes = await db
+      .select()
+      .from(joke)
+      .where(eq(joke.id, data.jokeId))
+      .limit(1)
+
+    const foundJoke = foundJokes[0]
+
+    if (!foundJoke) {
+      throw new Error('Joke not found')
+    }
+
+    await db
+      .update(joke)
+      .set({
+        score: foundJoke.score + data.change,
+      })
+      .where(eq(joke.id, data.jokeId))
+
+    return { success: true }
+  },
+)
 
 export const Route = createFileRoute('/')({
   component: App,
@@ -25,9 +50,21 @@ export const Route = createFileRoute('/')({
 function App() {
   const jokes = Route.useLoaderData()
   const { data: session, isPending } = authClient.useSession()
+  const router = useRouter()
 
   const topJokes = jokes.slice(0, 3)
   const moreJokes = jokes.slice(3)
+
+  const handleVote = async (jokeId: string, change: number) => {
+    await voteJoke({
+      data: {
+        jokeId,
+        change,
+      },
+    })
+
+    await router.invalidate()
+  }
 
   return (
     <main className="min-h-screen px-6 py-10">
@@ -128,9 +165,21 @@ function App() {
                   >
                     <div className="flex gap-4">
                       <div className="flex min-w-[54px] flex-col items-center justify-center rounded-[1rem] border border-[#eadfd1] bg-white px-2 py-3 text-lg font-bold text-[#6d5d4d]">
-                        <span>↑</span>
+                        <button
+                          type="button"
+                          onClick={() => handleVote(oneJoke.id, 1)}
+                          className="cursor-pointer leading-none"
+                        >
+                          ↑
+                        </button>
                         <span>{oneJoke.score}</span>
-                        <span>↓</span>
+                        <button
+                          type="button"
+                          onClick={() => handleVote(oneJoke.id, -1)}
+                          className="cursor-pointer leading-none"
+                        >
+                          ↓
+                        </button>
                       </div>
 
                       <div className="flex-1">
@@ -167,9 +216,21 @@ function App() {
                       >
                         <div className="flex gap-4">
                           <div className="flex min-w-[54px] flex-col items-center justify-center rounded-[1rem] border border-[#eadfd1] bg-white px-2 py-3 text-lg font-bold text-[#6d5d4d]">
-                            <span>↑</span>
+                            <button
+                              type="button"
+                              onClick={() => handleVote(oneJoke.id, 1)}
+                              className="cursor-pointer leading-none"
+                            >
+                              ↑
+                            </button>
                             <span>{oneJoke.score}</span>
-                            <span>↓</span>
+                            <button
+                              type="button"
+                              onClick={() => handleVote(oneJoke.id, -1)}
+                              className="cursor-pointer leading-none"
+                            >
+                              ↓
+                            </button>
                           </div>
 
                           <div className="flex-1">
