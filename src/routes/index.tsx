@@ -4,18 +4,16 @@ import { db } from '#/db'
 import { joke } from '#/db/schema'
 import { desc, eq } from 'drizzle-orm'
 import { authClient } from '#/lib/auth-client'
+import { Link } from '@tanstack/react-router'
 
 const getJokes = createServerFn({ method: 'GET' }).handler(async () => {
-  const jokes = await db
-    .select()
-    .from(joke)
-    .orderBy(desc(joke.score), desc(joke.createdAt))
-
+  const jokes = await db.select().from(joke).orderBy(desc(joke.score))
   return jokes
 })
 
-const voteJoke = createServerFn({ method: 'POST' }).handler(
-  async ({ data }: { data: { jokeId: string; change: number } }) => {
+const voteJoke = createServerFn({ method: 'POST' })
+  .inputValidator((data: { jokeId: number; change: number }) => data)
+  .handler(async ({ data }: { data: { jokeId: number; change: number } }) => {
     const foundJokes = await db
       .select()
       .from(joke)
@@ -36,8 +34,7 @@ const voteJoke = createServerFn({ method: 'POST' }).handler(
       .where(eq(joke.id, data.jokeId))
 
     return { success: true }
-  },
-)
+  })
 
 export const Route = createFileRoute('/')({
   component: App,
@@ -49,13 +46,13 @@ export const Route = createFileRoute('/')({
 
 function App() {
   const jokes = Route.useLoaderData()
-  const { data: session, isPending } = authClient.useSession()
+  const { data: session } = authClient.useSession()
   const router = useRouter()
 
   const topJokes = jokes.slice(0, 3)
   const moreJokes = jokes.slice(3)
 
-  const handleVote = async (jokeId: string, change: number) => {
+  const handleVote = async (jokeId: number, change: number) => {
     await voteJoke({
       data: {
         jokeId,
@@ -103,28 +100,28 @@ function App() {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="rounded-[1.6rem] border border-white/70 bg-[#4cee4c] px-5 py-6 shadow-[0_10px_24px_rgba(0,0,0,0.04)]">
                   <div className="mb-3 text-4xl">🤣</div>
-                  <p className="text-2xl font-extrabold tracking-wide text-[#6b4a22] uppercase">
+                  <p className="text-2xl font-extrabold uppercase tracking-wide text-[#6b4a22]">
                     Crash Cackler
                   </p>
                 </div>
 
                 <div className="rounded-[1.6rem] border border-white/70 bg-[#0dbdbd] px-5 py-6 shadow-[0_10px_24px_rgba(0,0,0,0.04)]">
                   <div className="mb-3 text-4xl">😂</div>
-                  <p className="text-2xl font-extrabold tracking-wide text-[#5d4b32] uppercase">
+                  <p className="text-2xl font-extrabold uppercase tracking-wide text-[#5d4b32]">
                     Pun Pilot
                   </p>
                 </div>
 
                 <div className="rounded-[1.6rem] border border-white/70 bg-[#eb3e94] px-5 py-6">
                   <div className="mb-3 text-4xl">😆</div>
-                  <p className="text-2xl font-extrabold tracking-wide text-[#6f5b20] uppercase">
+                  <p className="text-2xl font-extrabold uppercase tracking-wide text-[#6f5b20]">
                     Loop Laughter
                   </p>
                 </div>
 
                 <div className="rounded-[1.6rem] border border-white/70 bg-[#ecde11] px-5 py-6">
                   <div className="mb-3 text-4xl">😹</div>
-                  <p className="text-2xl font-extrabold tracking-wide text-[#6f5b20] uppercase">
+                  <p className="text-2xl font-extrabold uppercase tracking-wide text-[#6f5b20]">
                     Merge Meower
                   </p>
                 </div>
@@ -139,29 +136,120 @@ function App() {
           </div>
         </section>
 
-        <section className="mt-6 rounded-[1.8rem] border border-[#eadfd1] bg-white/70 p-7">
-          <div className="mb-6">
-            <h2 className="m-0 text-4xl font-bold text-[#2f241b]">📫 Joke Bin</h2>
-            <p className="mt-3 text-lg font-bold uppercase tracking-[0.12em] text-[#8a6a45]">
-              ⭐ Top 3 Jokes
-            </p>
+        <section className="mt-8 rounded-[2rem] border border-[#e7d7c5] bg-white/80 p-8 shadow-[0_10px_30px_rgba(80,60,30,0.06)] md:p-10">
+  {!session ? (
+    <div className="text-center">
+      <p className="text-sm font-extrabold uppercase tracking-[0.18em] text-[#8a6540]">
+        Members Only
+      </p>
+
+      <h2 className="mt-2 text-4xl font-bold text-[#2f241b]">
+        Log in or register to see the jokes
+      </h2>
+
+      <p className="mx-auto mt-4 max-w-[700px] text-xl leading-9 text-[#6d5d4d]">
+        The joke leaderboard is only available to signed-in users. Please log in
+        or create an account to browse, vote, and enjoy the chaos.
+      </p>
+
+      <div className="mt-8 flex flex-wrap justify-center gap-4">
+       <Link
+  to="/login"
+  className="rounded-full border border-[#e4b56d] bg-[#f7ecd7] px-6 py-3 text-sm font-extrabold uppercase tracking-[0.14em] text-[#9f6820] no-underline"
+>
+  Log In
+</Link>
+
+<Link
+  to="/register"
+  className="rounded-full border border-[#a7d7cf] bg-[#dff3ef] px-6 py-3 text-sm font-extrabold uppercase tracking-[0.14em] text-[#2c7c73] no-underline"
+>
+  Register
+</Link>
+      </div>
+    </div>
+  ) : (
+    <>
+      <div className="mb-6">
+        <p className="text-sm font-extrabold uppercase tracking-[0.18em] text-[#8a6540]">
+          Leaderboard
+        </p>
+        <h2 className="mt-2 text-4xl font-bold text-[#2f241b]">
+          Top voted jokes
+        </h2>
+      </div>
+
+      {jokes.length === 0 ? (
+        <p className="text-xl text-[#6d5d4d]">No jokes yet.</p>
+      ) : (
+        <>
+          <div className="space-y-5">
+            {topJokes.map((oneJoke) => (
+              <article
+                key={oneJoke.id}
+                className="rounded-[1.6rem] border border-[#ead39f] bg-[#fffaf3] p-5 shadow-[0_8px_18px_rgba(80,60,30,0.04)]"
+              >
+                <div className="flex gap-4">
+                  <div className="flex min-w-[54px] flex-col items-center justify-center rounded-[1rem] border border-[#eadfd1] bg-white px-2 py-3 text-lg font-bold text-[#6d5d4d]">
+                    <button
+                      type="button"
+                      onClick={() => handleVote(oneJoke.id, 1)}
+                      className="cursor-pointer leading-none"
+                    >
+                      ↑
+                    </button>
+
+                    <span>{oneJoke.score}</span>
+
+                    <button
+                      type="button"
+                      onClick={() => handleVote(oneJoke.id, -1)}
+                      className="cursor-pointer leading-none"
+                    >
+                      ↓
+                    </button>
+                  </div>
+
+                  <div className="flex-1">
+                    <h3 className="m-0 text-3xl font-bold text-[#2f241b]">
+                      {oneJoke.title}
+                    </h3>
+
+                    <p className="mt-3 text-xl leading-9 text-[#6d5d4d]">
+                      {oneJoke.content}
+                    </p>
+
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      <span className="rounded-full border border-[#f0d58a] bg-[#fff1bf] px-3 py-1 text-sm font-bold uppercase tracking-wide text-[#9f6820]">
+                        Top Joke
+                      </span>
+
+                      {session?.user?.id === oneJoke.userId && (
+                        <button
+                          type="button"
+                          className="rounded-full border border-[#efc7cf] bg-[#fff0f2] px-3 py-1 text-sm font-bold text-[#c25a70]"
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </article>
+            ))}
           </div>
 
-          {isPending ? (
-            <p className="m-0 text-2xl italic text-[#76829a]">Loading session...</p>
-          ) : !session ? (
-            <p className="m-0 text-2xl italic text-[#76829a]">
-              Please log in to view jokes.
-            </p>
-          ) : jokes.length === 0 ? (
-            <p className="m-0 text-2xl italic text-[#76829a]">No jokes found! 😥</p>
-          ) : (
-            <>
-              <div className="space-y-4">
-                {topJokes.map((oneJoke) => (
+          {moreJokes.length > 0 && (
+            <div className="mt-10">
+              <p className="mb-4 text-sm font-extrabold uppercase tracking-[0.18em] text-[#8a6540]">
+                More jokes
+              </p>
+
+              <div className="space-y-5">
+                {moreJokes.map((oneJoke) => (
                   <article
                     key={oneJoke.id}
-                    className="rounded-[1.6rem] border border-[#ead39f] bg-[#fffaf3] p-5 shadow-[0_8px_18px_rgba(80,60,30,0.04)]"
+                    className="rounded-[1.6rem] border border-[#eadfd1] bg-white p-5 shadow-[0_8px_18px_rgba(80,60,30,0.04)]"
                   >
                     <div className="flex gap-4">
                       <div className="flex min-w-[54px] flex-col items-center justify-center rounded-[1rem] border border-[#eadfd1] bg-white px-2 py-3 text-lg font-bold text-[#6d5d4d]">
@@ -172,7 +260,9 @@ function App() {
                         >
                           ↑
                         </button>
+
                         <span>{oneJoke.score}</span>
+
                         <button
                           type="button"
                           onClick={() => handleVote(oneJoke.id, -1)}
@@ -187,69 +277,31 @@ function App() {
                           {oneJoke.title}
                         </h3>
 
-                        <p className="mt-3 text-2xl leading-9 text-[#6d5d4d]">
+                        <p className="mt-3 text-xl leading-9 text-[#6d5d4d]">
                           {oneJoke.content}
                         </p>
 
-                        <div className="mt-4 flex flex-wrap gap-2">
-                          <span className="rounded-full border border-[#f0d58a] bg-[#fff1bf] px-3 py-1 text-sm font-bold uppercase tracking-wide text-[#9f6820]">
-                            ⭐ Top Joke
-                          </span>
-                        </div>
+                        {session?.user?.id === oneJoke.userId && (
+                          <div className="mt-4">
+                            <button
+                              type="button"
+                              className="rounded-full border border-[#efc7cf] bg-[#fff0f2] px-3 py-1 text-sm font-bold text-[#c25a70]"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </article>
                 ))}
               </div>
-
-              {moreJokes.length > 0 && (
-                <div className="mt-8">
-                  <p className="mb-4 text-lg font-bold uppercase tracking-[0.12em] text-[#8a6a45]">
-                    More Jokes
-                  </p>
-
-                  <div className="space-y-4">
-                    {moreJokes.map((oneJoke) => (
-                      <article
-                        key={oneJoke.id}
-                        className="rounded-[1.6rem] border border-[#eadfd1] bg-white p-5 shadow-[0_8px_18px_rgba(80,60,30,0.04)]"
-                      >
-                        <div className="flex gap-4">
-                          <div className="flex min-w-[54px] flex-col items-center justify-center rounded-[1rem] border border-[#eadfd1] bg-white px-2 py-3 text-lg font-bold text-[#6d5d4d]">
-                            <button
-                              type="button"
-                              onClick={() => handleVote(oneJoke.id, 1)}
-                              className="cursor-pointer leading-none"
-                            >
-                              ↑
-                            </button>
-                            <span>{oneJoke.score}</span>
-                            <button
-                              type="button"
-                              onClick={() => handleVote(oneJoke.id, -1)}
-                              className="cursor-pointer leading-none"
-                            >
-                              ↓
-                            </button>
-                          </div>
-
-                          <div className="flex-1">
-                            <h3 className="m-0 text-3xl font-bold text-[#2f241b]">
-                              {oneJoke.title}
-                            </h3>
-
-                            <p className="mt-3 text-2xl leading-9 text-[#6d5d4d]">
-                              {oneJoke.content}
-                            </p>
-                          </div>
-                        </div>
-                      </article>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </>
+            </div>
           )}
+        </>
+      )}
+    </>
+  )}
         </section>
       </div>
     </main>

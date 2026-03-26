@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { db } from '#/db'
-import { joke, session } from '#/db/schema'
-import { eq } from 'drizzle-orm'
+import { joke } from '#/db/schema'
+import { auth } from '#/lib/auth'
 
 export const Route = createFileRoute('/api/jokes')({
   server: {
@@ -18,28 +18,13 @@ export const Route = createFileRoute('/api/jokes')({
             )
           }
 
-          const cookieHeader = request.headers.get('cookie') ?? ''
-          const tokenMatch = cookieHeader.match(/better-auth\.session_token=([^;]+)/)
-          const token = tokenMatch?.[1]
+          const currentSession = await auth.api.getSession({
+            headers: request.headers,
+          })
 
-          if (!token) {
+          if (!currentSession?.user?.id) {
             return Response.json(
               { error: 'You must be logged in' },
-              { status: 401 },
-            )
-          }
-
-          const currentSession = await db
-            .select({
-              userId: session.userId,
-            })
-            .from(session)
-            .where(eq(session.token, token))
-            .limit(1)
-
-          if (!currentSession[0]) {
-            return Response.json(
-              { error: 'Invalid session' },
               { status: 401 },
             )
           }
@@ -49,7 +34,7 @@ export const Route = createFileRoute('/api/jokes')({
             .values({
               title: title.trim(),
               content: content.trim(),
-              userId: currentSession[0].userId,
+              userId: currentSession.user.id,
             })
             .returning()
 
