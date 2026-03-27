@@ -1,13 +1,47 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { desc, eq } from 'drizzle-orm'
 import { db } from '#/db'
 import { joke } from '#/db/schema'
-import { auth } from '#/lib/auth'
+import { getCurrentUserId } from '#/lib/getCurrentUserId'
 
 export const Route = createFileRoute('/api/jokes')({
   server: {
     handlers: {
+      GET: async () => {
+        try {
+          const jokes = await db
+            .select({
+              id: joke.id,
+              title: joke.title,
+              content: joke.content,
+              score: joke.score,
+              userId: joke.userId,
+              createdAt: joke.createdAt,
+            })
+            .from(joke)
+            .orderBy(desc(joke.score), desc(joke.createdAt))
+
+          return Response.json(jokes)
+        } catch (error) {
+          console.error('GET /api/jokes error:', error)
+          return Response.json(
+            { error: 'Failed to load jokes' },
+            { status: 500 },
+          )
+        }
+      },
+
       POST: async ({ request }) => {
         try {
+          const userId = await getCurrentUserId(request)
+
+          if (!userId) {
+            return Response.json(
+              { error: 'You must be logged in to create a joke' },
+              { status: 401 },
+            )
+          }
+
           const body = await request.json()
           const { title, content } = body
 
@@ -18,57 +52,86 @@ export const Route = createFileRoute('/api/jokes')({
             )
           }
 
-          const currentSession = await auth.api.getSession({
-            headers: request.headers,
-          })
-
-          if (!currentSession?.user?.id) {
-            return Response.json(
-              { error: 'You must be logged in' },
-              { status: 401 },
-            )
-          }
-
-          const insertedJoke = await db
+          const insertedJokes = await db
             .insert(joke)
             .values({
               title: title.trim(),
               content: content.trim(),
-              userId: currentSession.user.id,
+              score: 0,
+              userId,
             })
-            .returning()
+            .returning({
+              id: joke.id,
+              title: joke.title,
+              content: joke.content,
+              score: joke.score,
+              userId: joke.userId,
+              createdAt: joke.createdAt,
+            })
 
-          return Response.json(
-            { message: 'Joke saved', joke: insertedJoke[0] },
-            { status: 201 },
-          )
+          return Response.json(insertedJokes[0], { status: 201 })
         } catch (error) {
-          console.error(error)
+          console.error('POST /api/jokes error:', error)
           return Response.json(
-            { error: 'Failed to save joke' },
+            { error: 'Failed to create joke' },
             { status: 500 },
           )
         }
       },
 
-      GET: async () => {
+      DELETE: async ({ request }) => {
         try {
-          const jokes = await db
+          const userId = await getCurrentUserId(request)
+
+          if (!userId) {
+            return Response.json(
+              { error: 'You must be logged in to delete a joke' },
+              { status: 401 },
+            )
+          }
+
+          const body = await request.json()
+          const id = Number(body.id)
+
+          if (!id || Number.isNaN(id)) {
+            return Response.json(
+              { error: 'Valid joke id is required' },
+              { status: 400 },
+            )
+          }
+
+          const foundJokes = await db
             .select({
               id: joke.id,
-              title: joke.title,
-              content: joke.content,
-              score: joke.score,
-              createdAt: joke.createdAt,
               userId: joke.userId,
             })
             .from(joke)
+            .where(eq(joke.id, id))
+            .limit(1)
 
-          return Response.json(jokes)
+          const foundJoke = foundJokes[0]
+
+          if (!foundJoke) {
+            return Response.json(
+              { error: 'Joke not found' },
+              { status: 404 },
+            )
+          }
+
+          if (foundJoke.userId !== userId) {
+            return Response.json(
+              { error: 'You are not allowed to delete this joke' },
+              { status: 403 },
+            )
+          }
+
+          await db.delete(joke).where(eq(joke.id, id))
+
+          return Response.json({ success: true, deletedId: id })
         } catch (error) {
-          console.error(error)
+          console.error('DELETE /api/jokes error:', error)
           return Response.json(
-            { error: 'Failed to load jokes' },
+            { error: 'Failed to delete joke' },
             { status: 500 },
           )
         }
