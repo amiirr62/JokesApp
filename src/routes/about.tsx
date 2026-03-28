@@ -1,22 +1,106 @@
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/about')({
-  component: About,
+  component: AboutPage,
 })
 
-function About() {
+function AboutPage() {
   return (
-    <main className="page-wrap px-4 py-12">
-      <section className="island-shell rounded-2xl p-6 sm:p-8">
-        <p className="island-kicker mb-2">About</p>
-        <h1 className="display-title mb-3 text-4xl font-bold text-[var(--sea-ink)] sm:text-5xl">
-          A small starter with room to grow.
-        </h1>
-        <p className="m-0 max-w-3xl text-base leading-8 text-[var(--sea-ink-soft)]">
-          TanStack Start gives you type-safe routing, server functions, and
-          modern SSR defaults. Use this as a clean foundation, then layer in
-          your own routes, styling, and add-ons.
-        </p>
+    <main className="min-h-screen bg-[var(--page-bg)] px-4 py-10 text-[var(--text-color)]">
+      <section className="mx-auto max-w-4xl rounded-[2rem] border border-[var(--line)] bg-[var(--card-bg)] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.08)] sm:p-10">
+        
+        {/* Header */}
+        <div className="mb-8">
+          <p className="mb-3 inline-block rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-4 py-1 text-sm font-semibold tracking-wide text-[var(--sea-ink)]">
+            About This Project
+          </p>
+
+          <h1 className="mb-4 text-3xl font-extrabold tracking-tight sm:text-4xl">
+            React Final Project
+          </h1>
+
+          <p className="max-w-2xl text-base leading-7 text-[var(--sea-ink-soft)] sm:text-lg">
+            This application was developed as a final project for the course{' '}
+            <strong>COMP 3012 – Front-End Web Development with React.js</strong>.
+            It demonstrates modern front-end development practices using React
+            and a full-stack architecture.
+          </p>
+        </div>
+
+        {/* Student Info */}
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="rounded-3xl border border-[var(--line)] bg-[var(--chip-bg)] p-6">
+            <h2 className="mb-4 text-xl font-bold">Student Information</h2>
+
+            <div className="space-y-3 text-sm sm:text-base">
+              <p>
+                <span className="font-semibold">Name:</span> Amir Hashemifar
+              </p>
+              <p>
+                <span className="font-semibold">Student ID:</span> A01222601
+              </p>
+              <p>
+                <span className="font-semibold">Course:</span> COMP 3012 – Front-End Web Development with React.js
+              </p>
+              <p>
+                <span className="font-semibold">Tutor:</span> Armaan Dhanji
+              </p>
+            </div>
+          </div>
+
+          {/* Tech Stack */}
+          <div className="rounded-3xl border border-[var(--line)] bg-[var(--chip-bg)] p-6">
+            <h2 className="mb-4 text-xl font-bold">Technologies Used</h2>
+
+            <ul className="list-disc space-y-2 pl-5 text-sm sm:text-base text-[var(--sea-ink-soft)]">
+              <li><strong>React</strong> for building UI components</li>
+              <li><strong>TanStack Router</strong> for routing and navigation</li>
+              <li><strong>TanStack Start</strong> for full-stack integration</li>
+              <li><strong>TypeScript</strong> for type-safe development</li>
+              <li><strong>Tailwind CSS</strong> for styling</li>
+              <li><strong>Neon (PostgreSQL)</strong> for cloud database</li>
+              <li><strong>Drizzle ORM</strong> for database queries</li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Project Description */}
+        <div className="mt-8 rounded-3xl border border-[var(--line)] bg-[var(--chip-bg)] p-6">
+          <h2 className="mb-4 text-xl font-bold">Project Overview</h2>
+
+          <p className="text-sm leading-7 text-[var(--sea-ink-soft)] sm:text-base">
+            This project is a full-stack React application designed to manage
+            and display jokes with features such as authentication, CRUD
+            operations, and dynamic UI updates. It uses modern tools like
+            TanStack for efficient routing and application structure, and a Neon
+            PostgreSQL database for persistent data storage.
+          </p>
+        </div>
+
+        {/* GitHub */}
+        <div className="mt-8 rounded-3xl border border-[var(--line)] bg-[var(--chip-bg)] p-6">
+          <h2 className="mb-4 text-xl font-bold">GitHub</h2>
+
+          <p className="mb-4 text-sm text-[var(--sea-ink-soft)]">
+            You can view my GitHub profile and projects here:
+          </p>
+
+          <a
+            href="https://github.com/amiirr62"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center rounded-full border border-[var(--chip-line)] bg-[var(--header-bg)] px-5 py-2.5 text-sm font-semibold text-[var(--sea-ink)] transition hover:scale-[1.05] hover:underline"
+          >
+            Visit My GitHub
+          </a>
+        </div>
+
+        {/* Footer */}
+        <div className="mt-8 border-t border-[var(--line)] pt-6 text-sm text-[var(--sea-ink-soft)]">
+          <p>
+            Designed and developed by <strong>Amir Hashemifar</strong> as part of the COMP 3012 final project.
+          </p>
+        </div>
       </section>
     </main>
   )
