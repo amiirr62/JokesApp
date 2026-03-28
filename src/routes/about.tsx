@@ -9,7 +9,7 @@ function AboutPage() {
     <main className="min-h-screen bg-[var(--page-bg)] px-4 py-10 text-[var(--text-color)]">
       <section className="mx-auto max-w-4xl rounded-[2rem] border border-[var(--line)] bg-[var(--card-bg)] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.08)] sm:p-10">
         
-        {/* Header */}
+        
         <div className="mb-8">
           <p className="mb-3 inline-block rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-4 py-1 text-sm font-semibold tracking-wide text-[var(--sea-ink)]">
             About This Project
@@ -27,7 +27,7 @@ function AboutPage() {
           </p>
         </div>
 
-        {/* Student Info */}
+        
         <div className="grid gap-6 md:grid-cols-2">
           <div className="rounded-3xl border border-[var(--line)] bg-[var(--chip-bg)] p-6">
             <h2 className="mb-4 text-xl font-bold">Student Information</h2>
@@ -48,7 +48,7 @@ function AboutPage() {
             </div>
           </div>
 
-          {/* Tech Stack */}
+         
           <div className="rounded-3xl border border-[var(--line)] bg-[var(--chip-bg)] p-6">
             <h2 className="mb-4 text-xl font-bold">Technologies Used</h2>
 
@@ -64,20 +64,9 @@ function AboutPage() {
           </div>
         </div>
 
-        {/* Project Description */}
-        <div className="mt-8 rounded-3xl border border-[var(--line)] bg-[var(--chip-bg)] p-6">
-          <h2 className="mb-4 text-xl font-bold">Project Overview</h2>
+        
 
-          <p className="text-sm leading-7 text-[var(--sea-ink-soft)] sm:text-base">
-            This project is a full-stack React application designed to manage
-            and display jokes with features such as authentication, CRUD
-            operations, and dynamic UI updates. It uses modern tools like
-            TanStack for efficient routing and application structure, and a Neon
-            PostgreSQL database for persistent data storage.
-          </p>
-        </div>
-
-        {/* GitHub */}
+       
         <div className="mt-8 rounded-3xl border border-[var(--line)] bg-[var(--chip-bg)] p-6">
           <h2 className="mb-4 text-xl font-bold">GitHub</h2>
 
@@ -95,7 +84,7 @@ function AboutPage() {
           </a>
         </div>
 
-        {/* Footer */}
+        
         <div className="mt-8 border-t border-[var(--line)] pt-6 text-sm text-[var(--sea-ink-soft)]">
           <p>
             Designed and developed by <strong>Amir Hashemifar</strong> as part of the COMP 3012 final project.

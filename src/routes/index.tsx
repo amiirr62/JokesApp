@@ -182,14 +182,14 @@ function App() {
               <div className="mt-8 flex flex-wrap justify-center gap-4">
                 <Link
                   to="/login"
-                  className="rounded-full border border-[#e4b56d] bg-[#f7ecd7] px-6 py-3 text-sm font-extrabold uppercase tracking-[0.14em] text-[#9f6820] no-underline"
+                  className="rounded-full border border-[#e4b56d] bg-[#045720] px-6 py-3 text-sm font-extrabold uppercase tracking-[0.14em] text-[#9f6820] no-underline"
                 >
                   Log In
                 </Link>
 
                 <Link
                   to="/register"
-                  className="rounded-full border border-[#a7d7cf] bg-[#dff3ef] px-6 py-3 text-sm font-extrabold uppercase tracking-[0.14em] text-[#2c7c73] no-underline"
+                  className="rounded-full border border-[#a7d7cf] bg-[#045720]  px-6 py-3 text-sm font-extrabold uppercase tracking-[0.14em] text-[#2c7c73] no-underline"
                 >
                   Register
                 </Link>
